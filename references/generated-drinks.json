@@ -1,0 +1,45 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "id": "americano",
+      "file": "web/assets/generated/americano.png",
+      "prompt": "Use case: product-mockup. Asset type: single cafe kiosk drink menu product image for older adults. Primary subject: iced americano, dark espresso diluted with water, visible clear ice cubes, tall plain clear glass. Photorealistic clean studio product photography. One drink only, fully visible centered, square composition, beverage fills about 75 percent of frame with generous safe margins. Seamless pure white background, subtle soft gray contact shadow, diffuse daylight, crisp recognizable ingredients and realistic appetizing textures. Consistent Korean cafe menu catalog style, no people, no hands, no logos, no brand, no text, no typography, no watermark, no panels, no collage."
+    },
+    {
+      "id": "latte",
+      "file": "web/assets/generated/latte.png",
+      "prompt": "Use case: product-mockup. Asset type: single cafe kiosk drink menu product image for older adults. Primary subject: hot cafe latte in a plain white ceramic cup and saucer, light tan coffee and a simple milk foam heart. Photorealistic clean studio product photography. One drink only, fully visible centered, square composition, beverage fills about 75 percent of frame with generous safe margins. Seamless pure white background, subtle soft gray contact shadow, diffuse daylight, crisp recognizable ingredients and realistic appetizing textures. Consistent Korean cafe menu catalog style, no people, no hands, no logos, no brand, no text, no typography, no watermark, no panels, no collage."
+    },
+    {
+      "id": "tea",
+      "file": "web/assets/generated/tea.png",
+      "prompt": "Use case: product-mockup. Asset type: single cafe kiosk drink menu product image for older adults. Primary subject: hot chamomile herbal tea, golden translucent liquid in a clear glass tea cup with small white chamomile blossoms beside it. Photorealistic clean studio product photography. One drink only, fully visible centered, square composition, beverage fills about 75 percent of frame with generous safe margins. Seamless pure white background, subtle soft gray contact shadow, diffuse daylight, crisp recognizable ingredients and realistic appetizing textures. Consistent Korean cafe menu catalog style, no people, no hands, no logos, no brand, no text, no typography, no watermark, no panels, no collage."
+    },
+    {
+      "id": "juice",
+      "file": "web/assets/generated/juice.png",
+      "prompt": "Use case: product-mockup. Asset type: single cafe kiosk drink menu product image for older adults. Primary subject: strawberry juice, opaque deep pink-red drink in a tall clear glass, small fresh strawberry garnish on rim. Photorealistic clean studio product photography. One drink only, fully visible centered, square composition, beverage fills about 75 percent of frame with generous safe margins. Seamless pure white background, subtle soft gray contact shadow, diffuse daylight, crisp recognizable ingredients and realistic appetizing textures. Consistent Korean cafe menu catalog style, no people, no hands, no logos, no brand, no text, no typography, no watermark, no panels, no collage."
+    },
+    {
+      "id": "vanilla",
+      "file": "web/assets/generated/vanilla.png",
+      "prompt": "Use case: product-mockup. Asset type: single cafe kiosk drink menu product image for older adults. Primary subject: iced vanilla latte, creamy beige milk coffee in a tall clear glass with clear ice cubes and pale milk swirl. Photorealistic clean studio product photography. One drink only, fully visible centered, square composition, beverage fills about 75 percent of frame with generous safe margins. Seamless pure white background, subtle soft gray contact shadow, diffuse daylight, crisp recognizable ingredients and realistic appetizing textures. Consistent Korean cafe menu catalog style, no people, no hands, no logos, no brand, no text, no typography, no watermark, no panels, no collage."
+    },
+    {
+      "id": "honey",
+      "file": "web/assets/generated/honey.png",
+      "prompt": "Use case: product-mockup. Asset type: single cafe kiosk drink menu product image for older adults. Primary subject: iced honey americano, rich dark amber black coffee in a clear tall glass, ice cubes, tiny honey dipper with one golden drop beside the glass. Photorealistic clean studio product photography. One drink only, fully visible centered, square composition, beverage fills about 75 percent of frame with generous safe margins. Seamless pure white background, subtle soft gray contact shadow, diffuse daylight, crisp recognizable ingredients and realistic appetizing textures. Consistent Korean cafe menu catalog style, no people, no hands, no logos, no brand, no text, no typography, no watermark, no panels, no collage."
+    },
+    {
+      "id": "strawberry_latte",
+      "file": "web/assets/generated/strawberry_latte.png",
+      "prompt": "Use case: product-mockup. Asset type: single cafe kiosk drink menu product image for older adults. Primary subject: iced strawberry milk latte, distinct red crushed strawberry puree at bottom, white milk middle, soft pink top in tall clear glass, ice cubes. Photorealistic clean studio product photography. One drink only, fully visible centered, square composition, beverage fills about 75 percent of frame with generous safe margins. Seamless pure white background, subtle soft gray contact shadow, diffuse daylight, crisp recognizable ingredients and realistic appetizing textures. Consistent Korean cafe menu catalog style, no people, no hands, no logos, no brand, no text, no typography, no watermark, no panels, no collage."
+    },
+    {
+      "id": "peach_tea",
+      "file": "web/assets/generated/peach_tea.png",
+      "prompt": "Use case: product-mockup. Asset type: single cafe kiosk drink menu product image for older adults. Primary subject: iced peach black tea, translucent amber orange tea in tall clear glass, ice cubes and one fresh peach slice garnish. Photorealistic clean studio product photography. One drink only, fully visible centered, square composition, beverage fills about 75 percent of frame with generous safe margins. Seamless pure white background, subtle soft gray contact shadow, diffuse daylight, crisp recognizable ingredients and realistic appetizing textures. Consistent Korean cafe menu catalog style, no people, no hands, no logos, no brand, no text, no typography, no watermark, no panels, no collage."
+    }
+  ]
+}

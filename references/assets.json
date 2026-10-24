@@ -1,0 +1,52 @@
+[
+  {
+    "id": "americano",
+    "url": "https://img.79plus.co.kr/megahp/manager/upload/menu/20240610105645_1717984605982_8i5CoHU2NV.jpg",
+    "name": "아메리카노"
+  },
+  {
+    "id": "latte",
+    "url": "https://img.79plus.co.kr/megahp/manager/upload/menu/20240610105821_1717984701991_RUKCqSZ_HO.jpg",
+    "name": "카페라떼"
+  },
+  {
+    "id": "tea",
+    "url": "https://img.79plus.co.kr/megahp/manager/upload/menu/20240610105908_1717984748214_qc34s7Vkq5.jpg",
+    "name": "캐모마일"
+  },
+  {
+    "id": "juice",
+    "url": "https://img.79plus.co.kr/megahp/manager/upload/menu/20240610114741_1717987661472_LqJw6WITHO.jpg",
+    "name": "딸기주스"
+  },
+  {
+    "id": "vanilla",
+    "url": "https://img.79plus.co.kr/megahp/manager/upload/menu/20240610104603_1717983963750_lApih2z1h0.jpg",
+    "name": "바닐라라떼"
+  },
+  {
+    "id": "honey",
+    "url": "https://img.79plus.co.kr/megahp/manager/upload/menu/20240610133054_1717993854434_bTty_9u3br.jpg",
+    "name": "꿀아메리카노"
+  },
+  {
+    "id": "americano-ice",
+    "url": "https://img.79plus.co.kr/megahp/manager/upload/menu/20240610133007_1717993807130_nwB5CATOJJ.jpg",
+    "name": "americano-ice"
+  },
+  {
+    "id": "latte-ice",
+    "url": "https://img.79plus.co.kr/megahp/manager/upload/menu/20240610132819_1717993699956_cEyZRaBZh5.jpg",
+    "name": "latte-ice"
+  },
+  {
+    "id": "tea-ice",
+    "url": "https://img.79plus.co.kr/megahp/manager/upload/menu/20240610132753_1717993673758__j_omi1oWY.jpg",
+    "name": "tea-ice"
+  },
+  {
+    "id": "vanilla-ice",
+    "url": "https://img.79plus.co.kr/megahp/manager/upload/menu/20240610132249_1717993369864_VIG6IR2byt.jpg",
+    "name": "vanilla-ice"
+  }
+]

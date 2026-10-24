@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>로보독 도우미 · 주문 연습과 복약 알림</title>
+  <link rel="stylesheet" href="/readable.css">
+  <script src="/app.js" defer></script>
+  <link rel="stylesheet" href="/daywatch.css">
+  <link rel="stylesheet" href="/exercise.css">
+  <script src="/exercise.js" defer></script>
+  <link rel="stylesheet" href="/nap.css">
+  <script src="/nap.js" defer></script>
+</head>
+<body class="app-hub-mode">
+  <nav class="app-nav" aria-label="기능 선택"><strong>로보독 도우미</strong><button data-action="open_app" data-value="hub">기능 선택으로</button><span id="med-nav-status"></span></nav>
+  <main id="app-hub" class="app-hub">
+    <img src="/assets/robodog.svg" alt="로보독" width="150" height="129">
+    <h1>무엇을 도와드릴까요?</h1><p>사용할 기능을 골라 주세요.</p>
+    <div class="app-choices"><button id="app-choice-kiosk" data-action="open_app" data-value="kiosk"><span aria-hidden="true">☕</span><strong>키오스크 연습</strong><small>카페 주문을 차근차근 연습해요</small></button><button id="app-choice-medication" data-action="open_app" data-value="medication"><span aria-hidden="true">◷</span><strong>복약 알리미</strong><small>시간을 설정하고 STOP QR로 확인해요</small></button><button id="app-choice-daywatch" data-action="open_app" data-value="daywatch"><span aria-hidden="true">⌂</span><strong>안부 확인</strong><small>움직임과 얼굴을 확인해 알려드려요</small></button></div>
+  </main>
+  <main id="exercise-screen" class="exercise-screen" hidden aria-labelledby="exercise-heading">
+    <header class="exercise-header"><div><span class="exercise-eyebrow">로보독과 함께 · 가벼운 체조</span><h1 id="exercise-heading">천천히, 같이 움직여요</h1></div><button id="exercise-close" class="exercise-exit">체조 마치기</button></header>
+    <div class="exercise-intro"><p>그림을 보고 목표 횟수만큼 따라 해 보세요.</p><span>마빗 횟수 미션</span></div>
+    <section class="exercise-stage" aria-label="현재 체조 동작">
+      <figure class="exercise-picture"><img id="exercise-image" src="/assets/exercise/arm-wave.png" alt="양손 주먹을 쥐고 양팔을 가볍게 흔드는 어르신" width="1200" height="900"><figcaption id="exercise-image-caption">양손을 가볍게 쥐고 움직여요</figcaption></figure>
+      <div class="exercise-instruction"><div class="exercise-tag"><span id="exercise-number">동작 02</span><span class="exercise-random">3~10회 무작위 미션</span></div><h2 id="exercise-title">치어링</h2><p id="exercise-instruction" aria-live="polite">목표 횟수만큼 따라 해 보세요.</p><p id="exercise-detail" class="exercise-detail"></p><p id="exercise-sensor-state" role="status"></p><div class="exercise-time"><span id="exercise-countdown">0<span>/ 5회</span></span><div><strong id="exercise-run-state">마빗 카운트를 기다립니다</strong><small>목표 횟수를 채우면 다음 동작이 나와요</small></div></div><div id="exercise-progress" class="exercise-progress" role="progressbar" aria-label="현재 동작 완료 횟수" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><span id="exercise-progress-bar"></span></div></div>
+    </section>
+    <section class="exercise-controls" aria-label="체조 안내 조절"><button id="exercise-pause" class="exercise-pause">잠시 멈춤</button><div id="exercise-mission-state" class="exercise-next" role="status">목표 횟수만큼 해 보세요</div><button id="exercise-repeat" class="exercise-repeat"><span aria-hidden="true">♪</span> 다시 듣기</button></section>
+    <div class="exercise-footer"><label><input id="exercise-voice" type="checkbox" checked> 음성 안내</label><span id="exercise-voice-status" role="status">한국어 음성으로 안내해 드려요.</span><span id="exercise-session-count">안내한 동작 1개</span></div>
+    <section class="exercise-list" aria-label="안내하는 세 가지 동작"><span>함께 할 동작</span><div><span data-exercise-chip="2">02 치어링</span><span data-exercise-chip="3">03 암컬</span><span data-exercise-chip="4">04 손목 돌리기</span></div></section>
+    <p class="exercise-preview-note">선택한 동작의 마빗 카운트가 목표에 도달하면 자동으로 넘어갑니다. 쉬기는 미션에 포함하지 않습니다.</p>
+  </main>
+  <main id="nap-screen" class="nap-screen" hidden>
+    <header><span class="exercise-eyebrow">편안하게 쉬세요</span><h1>낮잠 자기</h1><p>몇 분 뒤에 깨워드릴까요?</p></header>
+    <form id="nap-form"><label for="nap-minutes">낮잠 시간</label><div><input id="nap-minutes" type="number" min="1" max="180" step="1" value="20" required><span>분 뒤</span></div><button type="submit">알람 등록하고 낮잠 자기</button></form>
+    <section id="nap-status-card" hidden aria-live="polite"><strong id="nap-status"></strong><p id="nap-due"></p><p id="nap-remaining"></p><p>낮잠 중에는 무활동을 위험으로 판단하지 않습니다.</p><button id="nap-end">낮잠 마치기</button></section>
+    <section class="nap-sensor"><details><summary>마빗 자동 전환 설정</summary><form id="sensor-config-form"><label>마빗 USB 포트<input id="sensor-port" value="COM6"></label><label>MICROBIT 드라이브 (자동 탐색 시 비워 두기)<input id="sensor-drive" placeholder="예: D:/"></label><button type="submit">연결 설정 저장</button></form></details><p id="sensor-switch-state"></p></section>
+  </main>
+  <main id="daywatch-screen" class="daywatch-screen" hidden>
+    <header class="med-heading"><img src="/assets/robodog.svg" alt="로보독" width="110" height="94"><div><span class="eyebrow">로보독과 함께하는 안부 확인</span><h1>안부 확인</h1><p>움직임이 없으면 찾아가고, 얼굴을 확인해 알려드려요.</p></div></header>
+    <section class="med-status-card" aria-live="polite"><strong id="daywatch-state">연결 준비 중</strong><p id="daywatch-message"></p><p id="daywatch-result">아직 확정된 결과가 없습니다.</p></section>
+    <div class="daywatch-facts"><p id="daywatch-input"></p><p id="daywatch-class"></p><p id="daywatch-route"></p></div>
+    <p>직진 → 오른쪽 90도 회전을 네 번 반복합니다. 순찰 중 움직임이 감지되면 멈춥니다. 쓰러짐 확정 후에는 분류값이 흔들려도 판정을 유지합니다.</p>
+    <p>신고는 모의 기록이며 실제 전화·문자는 보내지 않습니다.</p>
+    <details><summary>마빗 연결 설정</summary><form id="daywatch-port-form"><label for="daywatch-port">마빗 USB 포트</label><input id="daywatch-port" value="COM6" maxlength="128"><button type="submit">포트 적용</button></form><p>로보독 포트는 시작 화면의 COM4를 사용합니다. 포트를 바꾸려면 먼저 기능 선택으로 이동하세요.</p></details>
+    <details open><summary>안부 확인 결과 콘솔</summary><pre id="daywatch-log" role="log" aria-label="안부 확인 동작 기록"></pre></details>
+  </main>
+  <main id="medication-screen" class="medication-screen" hidden>
+    <header class="med-heading"><img src="/assets/robodog.svg" alt="로보독" width="110" height="94"><div><span class="eyebrow">로보독과 함께 기억해요</span><h1>복약 알리미</h1><p>설정한 시각에 알려드리고, STOP QR로 확인해요.</p></div></header>
+    <section id="med-status-card" class="med-status-card" aria-live="polite"><strong id="med-state">알림 설정 전</strong><p id="med-active-medicines"></p><p id="med-message"></p><p id="med-due"></p></section>
+    <div class="med-columns"><section class="med-settings"><h2>시간과 복용할 약을 추가해요</h2><form id="med-form"><label for="med-time">복약 시간</label><input id="med-time" name="time" type="time" value="08:30" required><label for="med-medicine">복용할 약 이름</label><input id="med-medicine" name="medicine" type="text" maxlength="80" placeholder="예: 아침 약, 비타민" required><button id="med-save" type="submit">복약 시간 추가</button></form><p>시간을 여러 개 등록할 수 있어요. 각 예약은 다음에 돌아오는 해당 시각에 한 번 알립니다.</p><p>확인할 때까지 눈 LED를 켜고 약 5초 간격으로 짖어요. STOP QR을 받으면 반복을 멈추고 준비 자세로 돌아갑니다.</p><p>PC와 Python 프로그램이 켜져 있어야 합니다. 화면을 바꿔도 예약은 유지됩니다.</p><section class="med-schedules" aria-label="등록한 복약 시간"><h3>등록한 시간 <span id="med-schedule-count"></span></h3><ul id="med-schedule-list"></ul></section><button class="med-cancel" data-action="med_cancel">예약 전체 종료</button></section>
+    <section class="med-qr"><h2>복용 후 STOP QR을 보여주세요</h2><img src="/assets/medication-stop.svg" alt="내용이 STOP인 복약 확인 QR 코드" width="210" height="210"><p>이 QR을 인쇄하거나 다른 화면에 띄워<br>로보독의 AI 카메라에 보여주세요.</p><a href="/assets/medication-stop.svg" download="STOP-복약확인.svg">STOP QR 내려받기</a><p id="med-qr-status" role="status"></p><button id="med-mock-qr" data-action="med_mock_qr" hidden>모의 모드 · STOP QR 확인 시험</button></section></div>
+  </main>
+  <div class="workspace">
+    <section class="mission" aria-label="지금 할 미션"><div class="mission-label"><span aria-hidden="true">◎</span><span id="mission-index">오늘의 연습</span></div><strong id="task">주문 방식을 선택해 주세요</strong><span id="task-detail">실제 주문과 결제가 없는 연습이에요.</span></section>
+    <aside class="coach">
+      <figure class="coach-robot"><img src="/assets/robodog.svg" alt="노란 눈을 반짝이는 검은 로보독" width="140" height="120"><figcaption>로보독과 천천히, 하나씩</figcaption></figure>
+      <section class="lesson-progress"><div><span class="eyebrow">나의 학습 여정</span><strong id="progress-count">0 / 16 완료</strong></div><p id="lesson-name">작은 단계부터 하나씩 연습해요.</p><button data-action="home">스테이지 목록 보기 →</button></section>
+      <ol class="steps" id="steps"></ol>
+      <section class="guidance" aria-label="로보독 안내"><div class="eyebrow" id="guidance-level">기본 가이드 · 지금 할 일</div><p id="guidance" aria-live="polite">화면을 불러오는 중이에요.</p></section>
+      <div class="help-actions"><button data-action="hint">힌트 보기</button><button data-action="repeat">다시 듣기</button><button class="help-wide" data-action="help">자세한 도움</button></div>
+      <label class="voice-toggle"><input type="checkbox" id="voice" checked> PC 음성 안내</label>
+      <details class="voice-details"><summary>음성 안내 상태</summary><div id="voice-status" class="small-note">한국어 음성을 사용할 수 있으면 읽어 드려요.</div><div id="voice-route" class="small-note">안내 멘트는 PC, 효과음과 애교는 로보독이 담당해요.</div></details>
+    </aside>
+
+    <main class="kiosk" aria-label="카페 주문 연습 키오스크">
+      <header class="brandbar"><button class="home-button" data-action="home" aria-label="처음으로">⌂ <span>처음으로</span></button><div class="brand">카페 주문 연습<small>실제 결제 없는 연습입니다</small></div><button id="fullscreen">⛶ <span>전체 화면</span></button></header>
+      <div class="training-strip"><span id="mode-label">안내 버전 · 함께 배우기</span></div>
+      <nav id="categories" class="categories" aria-label="메뉴 분류"></nav>
+      <div class="screen-heading"><div><span id="stage-label" class="eyebrow">시작하기</span><h2 id="heading">주문 연습을 시작해 볼까요?</h2></div><span id="counter" class="counter"></span></div>
+      <section id="content" class="content"></section>
+      <section class="basket" aria-label="선택한 주문"><div class="basket-title"><h3>선택한 주문</h3><span id="service-tag">이용 방식 선택 전</span></div><div class="basket-bottom"><div id="cart" class="cart"></div><button id="primary" class="primary" disabled>연습 시작하기</button></div></section>
+      <footer class="kiosk-footer"><button id="back" data-action="back">← 이전 화면</button><span>이미지는 이해를 돕는 예시입니다</span></footer>
+    </main>
+  </div>
+  <section class="system-area"><details class="robot-tools"><summary>연결 상태 및 시험</summary><div><span id="robot-dot" class="status-dot"></span><strong id="robot-status">연결 확인 중</strong><span id="robot-event"></span></div><div class="tool-buttons"><button data-action="sound_test">로봇 소리 시험</button><button data-action="gesture_test">몸 애교 시험</button><button id="refresh">화면 새로 연결</button></div></details><button class="quit-button" data-action="quit">종료</button><p id="robot-warning" role="status"></p><p id="network-error" role="alert"></p></section>
+</body>
+</html>

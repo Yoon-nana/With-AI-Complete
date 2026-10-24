@@ -1,0 +1,34 @@
+/* GUI 전용 체조 화면. 기존 기능의 표시와 동작은 바꾸지 않습니다. */
+.app-choices{grid-template-columns:repeat(2,minmax(0,1fr))}
+.exercise-screen{max-width:1200px;margin:0 auto;padding:32px 28px 40px;color:#203d30}
+.exercise-screen[hidden]{display:none}
+.exercise-mode .app-nav,.exercise-mode #app-hub,.exercise-mode #medication-screen,.exercise-mode #daywatch-screen,.exercise-mode .workspace,.exercise-mode .system-area{display:none!important}
+.exercise-mode{background:#f5f7ef}
+.exercise-header{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.exercise-eyebrow{font-size:16px;font-weight:750;color:#607653;letter-spacing:.03em}
+.exercise-header h1{font-size:clamp(28px,3vw,40px);letter-spacing:-.05em;line-height:1.3;margin:10px 0 0}
+.exercise-exit{font-size:18px;padding:14px 22px;border:1px solid #becdb7;border-radius:12px;background:white;white-space:nowrap;min-height:54px}
+.exercise-intro{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:16px 0 24px;font-size:20px}
+.exercise-intro p{margin:0}.exercise-intro>span{color:#68765e;font-size:14px;border:1px solid #d7dfcb;padding:6px 12px;border-radius:30px;white-space:nowrap}
+.exercise-stage{display:grid;grid-template-columns:1.06fr 1fr;background:white;border:1px solid #d9e2cf;border-radius:28px;overflow:hidden;box-shadow:0 10px 35px #2c4c2510}
+.exercise-picture{margin:0;background:#f6f6ed;display:flex;flex-direction:column;justify-content:center;min-width:0;padding:16px 10px 20px}
+.exercise-picture img{width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;border-radius:18px;mix-blend-mode:multiply}
+.exercise-picture figcaption{text-align:center;color:#5e7352;font-size:17px;margin:0 12px 4px}
+.exercise-instruction{padding:34px 34px 30px;display:flex;flex-direction:column;justify-content:center}
+.exercise-tag{display:flex;gap:10px;align-items:center;font-size:15px}
+#exercise-number{background:#e3eed5;padding:6px 12px;border-radius:8px;font-weight:800}.exercise-random{color:#778768}
+.exercise-instruction h2{font-size:clamp(30px,3.2vw,44px);letter-spacing:-.05em;line-height:1.25;margin:20px 0 18px}
+#exercise-instruction{font-size:clamp(24px,2.3vw,31px);line-height:1.65;letter-spacing:-.04em;margin:0;font-weight:650}
+.exercise-detail{font-size:17px;line-height:1.6;color:#6c7b61;margin:14px 0 26px}
+.exercise-time{display:flex;align-items:center;gap:18px;padding-top:16px;border-top:1px solid #e9edde}
+#exercise-countdown{font-size:48px;line-height:1.2;font-weight:850;letter-spacing:-.05em;min-width:96px}#exercise-countdown>span{font-size:20px;margin-left:5px;font-weight:600}
+.exercise-time strong{display:block;font-size:17px}.exercise-time small{display:block;font-size:14px;color:#728165;margin-top:5px}
+.exercise-progress{margin-top:15px;height:9px;overflow:hidden;border-radius:8px;background:#edf1e5}.exercise-progress>span{height:100%;width:100%;display:block;background:#75954e;border-radius:8px;transition:width .15s linear}
+.exercise-controls{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:14px;margin-top:22px}.exercise-controls button{min-height:70px;border-radius:15px;font-size:23px;font-weight:750;padding:14px 18px}.exercise-pause{background:#e8eedf;border:1px solid #ccd9bd}.exercise-next{background:#254e37;color:white;border:1px solid #254e37}.exercise-repeat{background:white;border:1px solid #ccd9bd}
+.exercise-controls button:hover,.exercise-exit:hover{filter:brightness(.97)}.exercise-controls button:focus-visible,.exercise-exit:focus-visible{outline:4px solid #97b878;outline-offset:4px}
+.exercise-footer{display:flex;align-items:center;gap:20px;flex-wrap:wrap;font-size:16px;color:#647657;padding:18px 2px}.exercise-footer label{display:flex;align-items:center;gap:8px;white-space:nowrap;color:#294c35;font-weight:700}.exercise-footer input{width:21px;height:21px;accent-color:#315b3c}#exercise-session-count{margin-left:auto;font-size:14px}
+.exercise-list{display:flex;align-items:center;gap:20px;justify-content:space-between;padding:16px 20px;border:1px solid #dbe3cf;border-radius:15px;background:#eef2e5;font-size:16px}.exercise-list>span{font-weight:750;white-space:nowrap}.exercise-list>div{display:flex;gap:12px;flex-wrap:wrap}.exercise-list [data-exercise-chip]{padding:7px 12px;border-radius:8px;color:#718061}.exercise-list .is-current{background:white!important;color:#244c32!important;font-weight:800;box-shadow:0 1px 5px #3453230a}
+.exercise-preview-note{font-size:13px;color:#77846c;margin-top:15px;line-height:1.6}
+@media(max-width:900px){.exercise-instruction{padding:24px}.exercise-detail{margin-bottom:16px}.exercise-screen{padding:24px 18px}.exercise-intro{font-size:18px}.exercise-list{display:block}.exercise-list>div{margin-top:12px}}
+@media(max-width:660px){.app-choices{grid-template-columns:1fr}.exercise-stage{grid-template-columns:1fr}.exercise-picture{padding:8px}.exercise-picture img{max-height:280px}.exercise-instruction{padding:24px}.exercise-header{align-items:flex-start}.exercise-exit{padding:12px;font-size:16px}.exercise-intro{align-items:flex-start;flex-direction:column;gap:8px}.exercise-intro>span{font-size:12px}.exercise-controls{grid-template-columns:1fr 1fr;gap:10px}.exercise-controls button{font-size:20px;min-height:62px}.exercise-repeat{grid-column:1/-1}.exercise-footer{gap:12px}#exercise-session-count{margin-left:0}.exercise-time{padding-top:12px}}
+@media(prefers-reduced-motion:reduce){.exercise-progress>span{transition:none}}

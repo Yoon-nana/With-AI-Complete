@@ -1,0 +1,44 @@
+{
+  "Checking grandmother-data-samples.json": {
+    "sha256": "5447e64a37db5666e54b8975ae5ddc15576f41009f1d325d0f9ed1ca72310e77",
+    "classes": {
+      "working": 19,
+      "not working": 12
+    },
+    "type": "training_samples_not_executable_model"
+  },
+  "체조-data-samples.json": {
+    "sha256": "bd915897eaa4c3ae2338ba7ca4bd70458609306d577959b68ded62cf62f94525",
+    "classes": {
+      "rest": 29,
+      "cheering": 11,
+      "elbow curl": 10,
+      "wrist circle": 13
+    },
+    "type": "training_samples_not_executable_model"
+  },
+  "checking.hex": {
+    "sha256": "bce9bf89779066dabe46a0f6e2a4d267e0e77d98f06247df21c4d189655ffe71",
+    "classes": {
+      "working": 19,
+      "not working": 12
+    },
+    "type": "trained_model_and_runtime",
+    "runtime": "microbit/checking_runtime.ts",
+    "source_verified": true,
+    "hardware_verified": false
+  },
+  "exercise.hex": {
+    "sha256": "4c27daf8ad71388224dc4f0659614bdf053b4cfb0ab9c8b3fe3177b0ae5c0fb8",
+    "classes": {
+      "rest": 29,
+      "cheering": 11,
+      "elbow curl": 10,
+      "wrist circle": 13
+    },
+    "type": "trained_model_and_runtime",
+    "runtime": "microbit/exercise_runtime.ts",
+    "source_verified": true,
+    "hardware_verified": false
+  }
+}

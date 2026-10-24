@@ -1,0 +1,21 @@
+{
+  "generator": "built-in image_gen / imagegen skill",
+  "purpose": "GUI-only exercise instruction assets",
+  "assets": [
+    {
+      "id": "arm-wave",
+      "prompt": "Use case: scientific-educational. Asset type: exercise instruction illustration for a Korean senior-friendly web GUI. Create one clean landscape 4:3 illustration, no text, no letters, no numbers, no border, no watermark. A friendly elderly Korean woman, short softly curled gray hair, round glasses, mint green cardigan over cream shirt and charcoal trousers, seated upright on a simple cream chair. Show head to hips with both hands clearly visible, anatomically natural five fingers with both hands gently closed into fists. BOTH arms raised comfortably at chest height, elbows bent about 90 degrees, forearms pointing upward and angled slightly outward. She is gently waving/shaking both clenched hands side to side, small clear teal curved movement arrows beside both fists. Do not depict open hands, overhead stretching, weights, or biceps curls. Warm ivory background with extremely subtle sage green shapes. Polished soft 3D editorial illustration, realistic human proportions and clear action, kind relaxed expression, generous negative space around hands, high legibility, same consistent character style as a Korean elderly exercise guide.",
+      "file": "/Users/syunsyunyee/codex/robodog-helper-thonny/web/assets/exercise/arm-wave.png"
+    },
+    {
+      "id": "arm-curl",
+      "prompt": "Use case: scientific-educational. Asset type: exercise instruction illustration for a Korean senior-friendly web GUI. Create one clean landscape 4:3 illustration, no text, no letters, no numbers, no border, no watermark. A friendly elderly Korean woman, short softly curled gray hair, round glasses, mint green cardigan over cream shirt and charcoal trousers, seated upright on a simple cream chair. Show head to hips and hands in frame. Demonstrate a gentle BICEPS CURL WITHOUT WEIGHTS: upper arms stay beside torso, elbows near waist, both hands in lightly closed fists, one forearm raised toward shoulder and the other shown lower and extended forward/down to clarify bending and extending at the elbows, both arms entirely anatomically natural. Clear teal curved movement arrows show forearms folding up and lowering, pivoting at elbows. Do not depict dumbbells, open palms, arm waving, overhead gestures or arm bending behind the back. Warm ivory background with extremely subtle sage green shapes. Polished soft 3D editorial illustration, realistic human proportions, kind relaxed expression, generous negative space around hands, high legibility, consistent Korean elderly exercise guide character.",
+      "file": "/Users/syunsyunyee/codex/robodog-helper-thonny/web/assets/exercise/arm-curl.png"
+    },
+    {
+      "id": "wrist-circle",
+      "prompt": "Use case: scientific-educational. Asset type: exercise instruction illustration for a Korean senior-friendly web GUI. Create one clean landscape 4:3 illustration, no text, no letters, no numbers, no border, no watermark. A friendly elderly Korean woman, short softly curled gray hair, round glasses, mint green cardigan over cream shirt and charcoal trousers, seated upright on a simple cream chair. Show head to hips with both hands enlarged enough for clear legibility. Upper arms close to body, elbows bent about 90 degrees, forearms reaching comfortably forward at lower chest height. Hands in gently closed fists. Demonstrate gentle OUTWARD WRIST CIRCLES with a clear teal circular arrow around EACH hand, mirrored outward direction. Both wrists look neutral and anatomically natural, do not twist or break arms. Keep shoulders and upper arms still. No open palms, overhead gestures, dumbbells, extra arms, or biceps curls. Warm ivory background with extremely subtle sage green shapes. Polished soft 3D editorial illustration, realistic human proportions, kind relaxed expression, generous negative space around hands, high legibility, consistent Korean elderly exercise guide character.",
+      "file": "/Users/syunsyunyee/codex/robodog-helper-thonny/web/assets/exercise/wrist-circle.png"
+    }
+  ]
+}
