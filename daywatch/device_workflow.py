@@ -123,7 +123,7 @@ class DeviceWorkflow:
         if self.state == 'REPORTED':
             raise ValueError('신고 후에는 재설정하세요.')
         self.active = True
-        self.transition('MONITOR', '입력 대기: X 상태(무활동 20초 초과)에서만 순찰을 시작합니다.')
+        self.transition('MONITOR', f'무응답 감지 중: 움직임 없음 {self.cfg.trigger_seconds}초부터 순찰을 시작합니다.')
 
     def reset(self):
         self.active = False
@@ -192,7 +192,7 @@ class DeviceWorkflow:
             self.resume_search = False
             self.resume_alert = False
         if self.state == 'MONITOR':
-            if self.armed and self.movement == 'STILL' and self.seconds > self.cfg.trigger_seconds:
+            if self.armed and self.movement == 'STILL' and self.seconds >= self.cfg.trigger_seconds:
                 self.armed = False
                 self.patrol()
             return

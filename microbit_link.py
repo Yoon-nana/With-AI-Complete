@@ -1,9 +1,8 @@
-"""마빗 한 대의 USB 연결과 모드별 HEX 전환. JSON 샘플을 실행 모델로 취급하지 않는다."""
+"""통합 HEX 한 개와 USB 모드 명령으로 통신한다. 실행 중 펌웨어를 덮어쓰지 않는다."""
 from collections import deque
 import importlib
 import os
 from pathlib import Path
-import shutil
 import threading
 import time
 
@@ -51,7 +50,7 @@ def board_drive(explicit=''):
 
 
 class MonitorChannel:
-    """기존 안부 확인 코드에 바이트 수신 인터페이스만 제공한다."""
+    """기존 무응답 감지 코드에 바이트 수신 인터페이스만 제공한다."""
     def __init__(self, link): self.link = link
     @property
     def in_waiting(self):
@@ -68,7 +67,8 @@ class MicrobitLink:
     def __init__(self, base, on_counts, clock=time.monotonic):
         self.base, self.on_counts, self.clock = Path(base), on_counts, clock
         self.lock = threading.RLock()
-        self.port, self.drive = 'COM6', ''
+        self.port, self.drive = '', ''
+        self.manual_connected = False
         self.desired, self.current = 'checking', None
         self.serial = None
         self.buffer, self.monitor = bytearray(), bytearray()
@@ -80,6 +80,9 @@ class MicrobitLink:
         self.commanded = None
         self.count_boot = 0
         self.checking_warmup = False
+        self.unified = False
+        self.on_mode = None
+        self.mode_sent_at = 0
         self.channel = MonitorChannel(self)
 
     def configure(self, port, drive=''):
@@ -87,11 +90,11 @@ class MicrobitLink:
             raise ValueError('마빗 USB 포트를 확인하세요.')
         if not isinstance(drive, str) or len(drive) > 512:
             raise ValueError('MICROBIT 드라이브 경로를 확인하세요.')
-        if drive:
-            board_drive(drive)
         self.close()
         self.port, self.drive = port.strip(), drive
+        self.manual_connected = True
         self.current = self.flash_target = None
+        self.unified = False
         self.next_try = 0
 
     def select(self, mode):
@@ -109,6 +112,7 @@ class MicrobitLink:
         with self.lock:
             return {'state': self.status, 'message': self.message, 'requested': self.desired,
                     'loaded': self.current, 'port': self.port, 'drive': self.drive,
+                    'unified': self.unified,
                     'fresh': self.last_rx is not None and self.clock()-self.last_rx <= 3,
                     'dataset': '체조-data-samples.json' if self.desired == 'exercise'
                                else 'Checking grandmother-data-samples.json' if self.desired == 'checking' else None}
@@ -116,7 +120,22 @@ class MicrobitLink:
     def _line(self, line):
         try: parts = line.decode('ascii').strip().split(',')
         except UnicodeError: return
-        if parts[:2] == ['BOOT', 'EXERCISE']:
+        if parts[:2] == ['CAPS', 'UNIFIED']:
+            self.unified = True
+        elif parts[:2] == ['BOOT', 'UNIFIED']:
+            self.unified = True
+            self.count_boot += 1
+            self.on_counts(None, self.count_boot)
+        elif len(parts) == 2 and parts[0] == 'BUTTON' and parts[1] in ('CHECK', 'EXERCISE', 'NAP'):
+            self.unified = True
+            selected = {'CHECK':'checking','EXERCISE':'exercise','NAP':'nap'}[parts[1]]
+            if self.on_mode is not None:
+                self.on_mode(selected)
+            else:
+                self.select(selected)
+        elif parts[:2] == ['MODEL', 'NAP']:
+            self.current = 'nap'
+        elif parts[:2] == ['BOOT', 'EXERCISE']:
             self.current = 'exercise'; self.count_boot += 1
             self.on_counts(None, self.count_boot)
         elif parts[:2] == ['MODEL', 'EXERCISE']:
@@ -146,6 +165,9 @@ class MicrobitLink:
         if not enabled:
             self.close(); self.status, self.message = 'MOCK', '모의 연결 · 실제 마빗 입력을 기다리지 않습니다.'
             return
+        if not self.port:
+            self.status, self.message = "WAITING", "마이크로비트 연결하기에서 이 PC의 포트를 선택하세요."
+            return
         now = self.clock()
         try:
             if self.serial is None:
@@ -159,40 +181,26 @@ class MicrobitLink:
                 line, _, rest = self.buffer.partition(b'\n'); self.buffer = bytearray(rest)
                 if len(line) <= 100: self._line(bytes(line))
             if len(self.buffer) > 4096: self.buffer.clear()
-            target = self.current if self.desired == 'nap' else self.desired
-            if target and self.current == target:
-                command = 'MODE,'+{'checking':'CHECK','exercise':'EXERCISE','nap':'NAP'}[self.desired]
-                if self.commanded != command:
-                    self.serial.write((command+'\n').encode('ascii')); self.commanded = command
-                    if self.desired == 'checking':
-                        self.monitor.clear()
-                fresh = self.last_rx is not None and now-self.last_rx <= 3
-                self.status = 'READY' if fresh else 'NO_SIGNAL'
-                self.message = '낮잠 중 · 위험 판단을 쉬고 있습니다.' if self.desired == 'nap' else '선택한 모델의 마빗 신호 수신 중' if fresh else '마빗 수신이 끊겼습니다.'
-                if fresh: self.flash_target = None
+            if not self.unified:
+                if now < self.probe_until: return
+                self.status = 'NEEDS_FIRMWARE'
+                self.message = '처음 한 번 models/unified.hex를 마빗 V2에 넣으세요. 이후 A=무응답, B=체조, A+B=휴식으로 전환합니다.'
                 return
-            if self.desired == 'nap':
-                if self.commanded != 'MODE,NAP':
-                    self.serial.write(b'MODE,NAP\n'); self.commanded = 'MODE,NAP'
-                self.status, self.message = 'NAP', '낮잠 중 · 마빗 판단을 사용하지 않습니다.'
-                return
-            if now < self.probe_until: return
-            if self.flash_target == self.desired:
-                self.status = 'RECONNECTING'
-                self.message = '모델을 내려보냈습니다. 마빗 재연결과 모델 응답을 기다립니다.'
-                if now > self.flash_deadline:
-                    self.status, self.message = 'MODEL_MISMATCH', '내려보낸 모델의 응답이 없습니다. 학습 HEX와 COM 포트를 확인하세요.'
-                return
-            firmware = self.base/'models'/('exercise.hex' if self.desired == 'exercise' else 'checking.hex')
-            if not valid_hex(firmware):
-                self.status, self.message = 'NEEDS_FIRMWARE', f'{firmware.name} 학습 HEX가 필요합니다. JSON은 학습 샘플이며 실행 모델이 아닙니다.'
-                return
-            drive = board_drive(self.drive)
-            self.close()
-            shutil.copyfile(firmware, drive/'AIGO.hex')
-            self.flash_target, self.flash_deadline = self.desired, now+25
-            self.current, self.next_try = None, now+3
-            self.status, self.message = 'FLASHING', '선택한 학습 모델을 마빗에 자동으로 내려보내고 있습니다.'
+            command = 'MODE,' + {'checking':'CHECK','exercise':'EXERCISE','nap':'NAP'}[self.desired]
+            if self.commanded != command or self.current != self.desired and now-self.mode_sent_at >= 2:
+                self.serial.write((command+'\n').encode('ascii'))
+                self.commanded, self.mode_sent_at = command, now
+                if self.desired == 'checking': self.monitor.clear()
+            fresh = self.last_rx is not None and now-self.last_rx <= 3
+            if self.current != self.desired:
+                self.status, self.message = 'SWITCHING', '통합 마빗 모드 전환 응답을 기다립니다.'
+            elif not fresh:
+                self.status, self.message = 'NO_SIGNAL', '마빗 수신이 끊겼습니다. USB 연결을 확인하세요.'
+            else:
+                self.status = 'NAP' if self.desired == 'nap' else 'READY'
+                self.message = {'checking':'무응답 감지 중 · A 무응답 / B 체조 / A+B 휴식',
+                    'exercise':'체조 인식 중 · A 무응답 / B 체조 / A+B 휴식',
+                    'nap':'휴식 모드 · 모델 실행과 무활동 판단을 쉽니다.'}[self.desired]
         except (OSError, ValueError, ImportError) as error:
             self.close(); self.next_try = now+3
             self.status, self.message = 'ERROR', str(error)
@@ -202,3 +210,6 @@ class MicrobitLink:
             try: self.serial.close()
             finally: self.serial = None
         self.buffer.clear()
+        self.unified = False
+        self.current = None
+        self.last_rx = None

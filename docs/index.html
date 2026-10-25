@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>정선 AIGO · IN 서비스 시작</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#f1f6f5;color:#213e3c;font:16px/1.6 "Segoe UI",sans-serif}.wrap{max-width:820px;margin:60px auto;padding:32px;background:white;border:1px solid #d9e5e2;border-radius:22px}h1{font-size:34px;margin:8px 0}small{color:#617c75;letter-spacing:1.2px}.row{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}button{font:inherit;padding:12px 18px;border:1px solid #bad0c8;background:white;color:#245a50;border-radius:10px;cursor:pointer}button.primary{background:#236a65;color:white}input{font:inherit;padding:12px;border:1px solid #bad0c8;border-radius:9px;width:180px}#status{padding:12px;background:#f2f7f4;border-radius:9px}.steps{font-size:14px;color:#61776e}a{color:#236a65}.features{display:grid;grid-template-columns:1fr 1fr;gap:12px}.features div{padding:17px;background:#f5f8f5;border-radius:12px}@media(max-width:600px){.wrap{margin:16px;padding:22px}.features{grid-template-columns:1fr}}</style>
+<link rel="stylesheet" href="firmware-guide.css"><script src="firmware-guide.js" data-asset-root="assets/microbit-guide/" defer></script></head><body><main class="wrap"><small>정선 AIGO · IN SERVICE</small><h1>생활을 돕는 로보독</h1><p>정선 AIGO IN 서비스 · 키오스크 연습, 체조, 복약 알림과 무응답 감지를 시작하세요.</p><div class="features"><div>☕ 키오스크 연습</div><div>◷ 복약 알리미</div><div>✦ 가벼운 체조</div><div>⌂ 무응답 감지</div></div><div class="row"><input id="port" placeholder="로보독 COM 포트" aria-label="로보독 COM 포트"><button class="primary" id="connect">로보독 연결하기</button><button id="open">서비스 화면 열기</button></div><p id="status" role="status">처음 사용하는 PC는 아래 「처음 사용하는 PC」 안내를 따라 연결 도우미를 설치하세요. 설치한 PC에서는 서비스 화면을 열어 장치를 연결합니다.</p><p><a id="local-link" href="http://127.0.0.1:8766/start">이미 실행 중인 IN 서비스 열기</a></p><details class="steps"><summary>처음 사용하는 PC</summary><p><a href="https://github.com/Yoon-nana/With-AI-Complete/archive/refs/heads/main.zip">프로젝트 파일 다운로드</a> → 압축 풀기 → Windows에 Python 3.13 설치 → 폴더의 <strong>IN_Install.cmd</strong>를 한 번 실행해 연결 도우미를 등록하세요. 이후에는 이 HTML만 열면 됩니다. 외부 도우미 실행 요청은 허용해 주세요. 앱 안에서 요청이 열리지 않으면 Chrome·Edge에서 사용하세요.</p></details><p class="steps">마이크로비트 V2: <a href="program/unified.hex" download="AIGO-IN-unified.hex">마이크로비트 프로그램 다운로드</a> · 처음 한 번만 넣으면 됩니다.</p><p class="steps">이 웹페이지는 서비스 시작과 프로그램 설치를 안내합니다. 장치 제어 화면은 PC에서 열립니다. 신고 기능은 실제 전화·문자를 보내지 않는 모의 기록입니다.</p><p><a href="https://github.com/Yoon-nana/With-AI-Complete">GitHub 소스 코드 보기</a></p></main>
+<script>
+async function launch(connect){
+ const port=document.getElementById('port').value.trim().toUpperCase();
+ if(connect&&port&&!/^COM[1-9][0-9]{0,3}$/.test(port)){document.getElementById('status').textContent='올바른 COM 포트를 입력하거나 서비스 화면에서 장치 목록을 선택하세요.';return}
+ const selected=connect&&port?port:'AUTO';
+ const target='http://127.0.0.1:8766/start'+(selected==='AUTO'?'':'?robot_port='+selected);
+ document.getElementById('local-link').href=target;
+ document.getElementById('status').textContent='IN 연결 도우미를 확인하고 있습니다…';
+ try{const response=await fetch('http://127.0.0.1:8766/bridge-info',{signal:AbortSignal.timeout(1500)});if(response.ok&&(await response.json()).bridge==='aigo-in-v1'){location.href=target;return}}catch{}
+ location.href='aigo-in://open?port='+selected;
+ document.getElementById('status').textContent='연결 도우미 실행을 허용하세요. 반응이 없으면 IN_Install.cmd를 실행하거나 Chrome·Edge에서 이 HTML을 열어 주세요.';
+}
+document.getElementById('connect').onclick=()=>launch(true);
+document.getElementById('open').onclick=()=>launch(false);
+</script></body></html>

@@ -19,11 +19,13 @@ class ActivityCoordinator:
         self.mode, self.mission, self.counters = 'checking', None, None
         self.last_action = None
         self.completed_at = None
+        self.reward_pending = False
         self.total_completed = 0
         self.nap_id = None
         self.nap_due = None
         self.nap_finished = False
         self.link = MicrobitLink(self.base, self.feed_counts)
+        self.link.on_mode = self.hardware_mode
         self.daywatch.external_input = self.link.channel
         self.daywatch.exercise_gate = self
         self.boot = None
@@ -35,10 +37,27 @@ class ActivityCoordinator:
                 self.mode = 'nap'
                 break
 
+    def hardware_mode(self, mode):
+        """Keep physical A/B/AB changes in sync with the PC mission state."""
+        with self.lock:
+            if self.nap_id or self.medication.snapshot()['active']:
+                self.link.commanded = None
+                return
+            if mode == 'exercise':
+                if self.mode != 'exercise': self.start_exercise()
+            elif mode == 'checking':
+                self.end_exercise()
+                self.mode = 'checking'
+                self.link.select('checking')
+            elif mode == 'nap':
+                self.mode, self.mission = 'nap', None
+                self.link.select('nap')
+                self.daywatch.select(False)
+
     def _load_settings(self):
         try:
             config = json.loads((self.base/'data/microbit_settings.json').read_text())
-            self.link.port = config.get('port','COM6')
+            self.link.port = config.get('port','')
             self.link.drive = config.get('drive','')
         except (OSError, ValueError, TypeError):
             pass
@@ -46,9 +65,7 @@ class ActivityCoordinator:
     def configure(self, value):
         if not isinstance(value, dict): raise ValueError('마빗 연결 설정을 확인하세요.')
         with self.lock:
-            port = value.get('port','COM6')
-            if isinstance(port,str) and port.casefold() == 'com4':
-                raise ValueError('COM4는 로보독 포트입니다. 마빗 USB 포트를 선택하세요.')
+            port = value.get('port','')
             self.link.configure(port,value.get('drive',''))
             folder = self.base/'data'; folder.mkdir(exist_ok=True)
             temporary = folder/'microbit_settings.tmp'
@@ -72,6 +89,7 @@ class ActivityCoordinator:
             if self.nap_id: raise ValueError('낮잠을 먼저 마친 뒤 체조를 시작하세요.')
             if self.medication.snapshot()['active']: raise ValueError('진행 중인 알람을 먼저 확인하세요.')
             self.mode = 'exercise'; self.total_completed = 0
+            self.reward_pending = False
             self._new_mission()
             self.link.select('exercise')
             self.daywatch.select(False)
@@ -80,6 +98,7 @@ class ActivityCoordinator:
         with self.lock:
             if self.mode == 'exercise': self.mode = 'checking'
             self.mission = None
+            self.reward_pending = False
             self.link.select(self.mode)
 
     def pause_exercise(self):
@@ -107,6 +126,7 @@ class ActivityCoordinator:
                 m['complete'] = True
                 self.total_completed += 1
                 self.completed_at = self.clock()
+                self.reward_pending = True
 
     def start_nap(self, minutes):
         if type(minutes) is not int or not 1 <= minutes <= 180:
@@ -149,12 +169,15 @@ class ActivityCoordinator:
                     self.nap_id = self.nap_due = None; self.mode = 'checking'
                     self.nap_finished = True
             self.link.select(self.mode)
-        enabled = worker.controller.mode == 'real' and worker.available
+        enabled = self.link.manual_connected or worker.controller.mode == 'real' and worker.available
         self.link.tick(enabled)
         with self.lock:
-            if self.mode == 'exercise' and self.completed_at is not None and self.clock()-self.completed_at >= 1.5:
+            if self.reward_pending and self.mode == 'exercise' and not self.medication.snapshot()['active']:
+                if worker.submit('SUCCESS'):
+                    self.reward_pending = False
+            if self.mode == 'exercise' and not self.reward_pending and self.completed_at is not None and self.clock()-self.completed_at >= 1.5:
                 self._new_mission()
-            monitor = self.mode == 'checking'
+            monitor = self.mode == 'checking' and self.daywatch.enabled
             if self.daywatch.requested != monitor: self.daywatch.select(monitor)
 
     def close(self): self.link.close()

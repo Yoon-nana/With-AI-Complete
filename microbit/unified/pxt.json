@@ -1,0 +1,19 @@
+{
+  "name": "AIGO-IN-unified",
+  "description": "Two original trained models, one microbit, button/serial mode switch",
+  "dependencies": {
+    "core": "*",
+    "microphone": "*",
+    "machine-learning": "github:microbit-foundation/pxt-microbit-ml#v1.0.16",
+    "machine-learning-runner": "file:runner"
+  },
+  "files": [
+    "main.ts",
+    "models.ts"
+  ],
+  "preferredEditor": "tsprj",
+  "targetVersions": {
+    "target": "9.0.12",
+    "pxt": "13.0.9"
+  }
+}

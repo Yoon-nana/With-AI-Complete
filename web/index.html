@@ -11,16 +11,21 @@
   <script src="/exercise.js" defer></script>
   <link rel="stylesheet" href="/nap.css">
   <script src="/nap.js" defer></script>
-</head>
+  <link rel="stylesheet" href="/connection.css">
+  <script src="/connection.js" defer></script>
+  <script src="/monitor-settings.js" defer></script>
+<link rel="stylesheet" href="/firmware-guide.css"><script src="/firmware-guide.js" defer></script></head>
 <body class="app-hub-mode">
   <nav class="app-nav" aria-label="기능 선택"><strong>로보독 도우미</strong><button data-action="open_app" data-value="hub">기능 선택으로</button><span id="med-nav-status"></span></nav>
+  <section class="in-connection"><button id="in-robot-open" type="button">로보독 연결하기</button><button id="in-robot-disconnect" type="button" disabled>로보독 연결 해제</button><button id="in-microbit-open" type="button">마이크로비트 연결하기</button><span id="in-microbit-status" role="status">처음 한 번 HEX를 마이크로비트 V2에 넣어 주세요.</span><span id="in-robot-status" role="status">로보독 미연결 · 화면 먼저 사용 가능</span></section>
   <main id="app-hub" class="app-hub">
     <img src="/assets/robodog.svg" alt="로보독" width="150" height="129">
     <h1>무엇을 도와드릴까요?</h1><p>사용할 기능을 골라 주세요.</p>
-    <div class="app-choices"><button id="app-choice-kiosk" data-action="open_app" data-value="kiosk"><span aria-hidden="true">☕</span><strong>키오스크 연습</strong><small>카페 주문을 차근차근 연습해요</small></button><button id="app-choice-medication" data-action="open_app" data-value="medication"><span aria-hidden="true">◷</span><strong>복약 알리미</strong><small>시간을 설정하고 STOP QR로 확인해요</small></button><button id="app-choice-daywatch" data-action="open_app" data-value="daywatch"><span aria-hidden="true">⌂</span><strong>안부 확인</strong><small>움직임과 얼굴을 확인해 알려드려요</small></button></div>
+    <div class="app-choices"><button id="app-choice-kiosk" data-action="open_app" data-value="kiosk"><span aria-hidden="true">☕</span><strong>키오스크 연습</strong><small>카페 주문을 차근차근 연습해요</small></button><button id="app-choice-medication" data-action="open_app" data-value="medication"><span aria-hidden="true">◷</span><strong>복약 알리미</strong><small>시간을 설정하고 STOP QR로 확인해요</small></button><button id="app-choice-daywatch" data-action="open_app" data-value="daywatch"><span aria-hidden="true">⌂</span><strong>무응답 감지</strong><small>움직임과 얼굴을 확인해 알려드려요</small></button></div>
   </main>
   <main id="exercise-screen" class="exercise-screen" hidden aria-labelledby="exercise-heading">
     <header class="exercise-header"><div><span class="exercise-eyebrow">로보독과 함께 · 가벼운 체조</span><h1 id="exercise-heading">천천히, 같이 움직여요</h1></div><button id="exercise-close" class="exercise-exit">체조 마치기</button></header>
+    <section class="in-connection exercise-connection"><a class="in-download" href="/firmware/unified.hex" download="AIGO-IN-unified.hex">마이크로비트 프로그램 다운로드</a></section>
     <div class="exercise-intro"><p>그림을 보고 목표 횟수만큼 따라 해 보세요.</p><span>마빗 횟수 미션</span></div>
     <section class="exercise-stage" aria-label="현재 체조 동작">
       <figure class="exercise-picture"><img id="exercise-image" src="/assets/exercise/arm-wave.png" alt="양손 주먹을 쥐고 양팔을 가볍게 흔드는 어르신" width="1200" height="900"><figcaption id="exercise-image-caption">양손을 가볍게 쥐고 움직여요</figcaption></figure>
@@ -35,16 +40,27 @@
     <header><span class="exercise-eyebrow">편안하게 쉬세요</span><h1>낮잠 자기</h1><p>몇 분 뒤에 깨워드릴까요?</p></header>
     <form id="nap-form"><label for="nap-minutes">낮잠 시간</label><div><input id="nap-minutes" type="number" min="1" max="180" step="1" value="20" required><span>분 뒤</span></div><button type="submit">알람 등록하고 낮잠 자기</button></form>
     <section id="nap-status-card" hidden aria-live="polite"><strong id="nap-status"></strong><p id="nap-due"></p><p id="nap-remaining"></p><p>낮잠 중에는 무활동을 위험으로 판단하지 않습니다.</p><button id="nap-end">낮잠 마치기</button></section>
-    <section class="nap-sensor"><details><summary>마빗 자동 전환 설정</summary><form id="sensor-config-form"><label>마빗 USB 포트<input id="sensor-port" value="COM6"></label><label>MICROBIT 드라이브 (자동 탐색 시 비워 두기)<input id="sensor-drive" placeholder="예: D:/"></label><button type="submit">연결 설정 저장</button></form></details><p id="sensor-switch-state"></p></section>
+    <section class="nap-sensor"><details><summary>통합 마빗 연결 설정</summary><form id="sensor-config-form"><label>마빗 USB 포트<input id="sensor-port" value="COM6"></label><input id="sensor-drive" type="hidden" value=""><p>처음 한 번 unified.hex 설치 · A: 무응답 감지 / B: 체조 / A+B: 휴식</p><button type="submit">연결 설정 저장</button></form></details><p id="sensor-switch-state"></p></section>
   </main>
   <main id="daywatch-screen" class="daywatch-screen" hidden>
-    <header class="med-heading"><img src="/assets/robodog.svg" alt="로보독" width="110" height="94"><div><span class="eyebrow">로보독과 함께하는 안부 확인</span><h1>안부 확인</h1><p>움직임이 없으면 찾아가고, 얼굴을 확인해 알려드려요.</p></div></header>
+    <header class="med-heading"><img src="/assets/robodog.svg" alt="로보독" width="110" height="94"><div><span class="eyebrow">로보독과 함께하는 무응답 감지</span><h1>무응답 감지</h1><p>움직임이 없으면 찾아가고, 얼굴을 확인해 알려드려요.</p></div></header>
+    <section class="daywatch-settings">
+      <h2>무응답 감지 설정</h2>
+      <label class="daywatch-toggle"><input id="daywatch-enabled" type="checkbox" role="switch"> 무응답 감지 켜기</label>
+      <p id="daywatch-enabled-state" role="status"></p>
+      <form id="daywatch-settings-form">
+        <label for="daywatch-trigger-seconds">움직임 없음 → 순찰 시작 (초)</label><input id="daywatch-trigger-seconds" type="number" min="1" max="3600" step="1" required value="20">
+        <label for="daywatch-response-seconds">쓰러짐 확인 후 무응답 → 자동 모의 신고 (초)</label><input id="daywatch-response-seconds" type="number" min="1" max="3600" step="1" required value="15">
+        <button type="submit">시간 설정 저장</button>
+      </form>
+      <p>움직임이 없으면 순찰하며 얼굴을 확인합니다. 쓰러짐(class 2) 확인 뒤에도 설정한 시간 동안 움직임이 없으면 모의 신고합니다. 센서 연결 끊김은 무응답으로 신고하지 않습니다.</p>
+    </section>
     <section class="med-status-card" aria-live="polite"><strong id="daywatch-state">연결 준비 중</strong><p id="daywatch-message"></p><p id="daywatch-result">아직 확정된 결과가 없습니다.</p></section>
     <div class="daywatch-facts"><p id="daywatch-input"></p><p id="daywatch-class"></p><p id="daywatch-route"></p></div>
     <p>직진 → 오른쪽 90도 회전을 네 번 반복합니다. 순찰 중 움직임이 감지되면 멈춥니다. 쓰러짐 확정 후에는 분류값이 흔들려도 판정을 유지합니다.</p>
     <p>신고는 모의 기록이며 실제 전화·문자는 보내지 않습니다.</p>
-    <details><summary>마빗 연결 설정</summary><form id="daywatch-port-form"><label for="daywatch-port">마빗 USB 포트</label><input id="daywatch-port" value="COM6" maxlength="128"><button type="submit">포트 적용</button></form><p>로보독 포트는 시작 화면의 COM4를 사용합니다. 포트를 바꾸려면 먼저 기능 선택으로 이동하세요.</p></details>
-    <details open><summary>안부 확인 결과 콘솔</summary><pre id="daywatch-log" role="log" aria-label="안부 확인 동작 기록"></pre></details>
+    <details><summary>마빗 연결 설정</summary><form id="daywatch-port-form"><label for="daywatch-port">마빗 USB 포트</label><input id="daywatch-port" value="COM6" maxlength="128"><button type="submit">포트 적용</button></form><p>로보독 포트는 상단 로보독 연결하기에서 선택합니다. 마이크로비트와 서로 다른 포트를 지정하세요.</p></details>
+    <details open><summary>무응답 감지 결과 콘솔</summary><pre id="daywatch-log" role="log" aria-label="무응답 감지 동작 기록"></pre></details>
   </main>
   <main id="medication-screen" class="medication-screen" hidden>
     <header class="med-heading"><img src="/assets/robodog.svg" alt="로보독" width="110" height="94"><div><span class="eyebrow">로보독과 함께 기억해요</span><h1>복약 알리미</h1><p>설정한 시각에 알려드리고, STOP QR로 확인해요.</p></div></header>
@@ -75,5 +91,6 @@
     </main>
   </div>
   <section class="system-area"><details class="robot-tools"><summary>연결 상태 및 시험</summary><div><span id="robot-dot" class="status-dot"></span><strong id="robot-status">연결 확인 중</strong><span id="robot-event"></span></div><div class="tool-buttons"><button data-action="sound_test">로봇 소리 시험</button><button data-action="gesture_test">몸 애교 시험</button><button id="refresh">화면 새로 연결</button></div></details><button class="quit-button" data-action="quit">종료</button><p id="robot-warning" role="status"></p><p id="network-error" role="alert"></p></section>
+<dialog id="in-connect-dialog" class="in-connect-dialog" aria-labelledby="in-connect-title"><h2 id="in-connect-title">장치 연결</h2><p id="in-connect-guide"></p><label for="in-device-list">이 PC의 장치 목록</label><select id="in-device-list"><option value="">포트 찾기를 누르세요</option></select><button id="in-ports-refresh" type="button">포트 찾기</button><label for="in-device-port">선택한 COM 포트</label><input id="in-device-port" placeholder="장치 목록에서 선택하거나 직접 입력"><div class="in-connect-actions"><button id="in-device-connect" type="button">연결하기</button><button id="in-connect-close" type="button">닫기</button></div><p id="in-connect-message" role="status"></p><a id="in-dialog-hex" href="/firmware/unified.hex" download="AIGO-IN-unified.hex" hidden>마이크로비트 프로그램 다운로드</a></dialog>
 </body>
 </html>

@@ -1,5 +1,6 @@
-"""기존 워커에 안부 확인 본체를 연결한다. COM을 중복으로 열지 않는다."""
+"""기존 워커에 무응답 감지 본체를 연결한다. COM을 중복으로 열지 않는다."""
 from collections import deque
+from dataclasses import replace
 from datetime import datetime
 import importlib
 import importlib.util
@@ -40,9 +41,20 @@ class DaywatchService:
         self.base = Path(base)
         self.lock = threading.RLock()
         self.requested = False
+        self.enabled = True
+        self.trigger_seconds = 20
+        self.response_seconds = 15
+        try:
+            saved = json.loads((self.base/'data/daywatch_settings.json').read_text(encoding='utf-8'))
+            if type(saved.get('enabled')) is bool: self.enabled = saved['enabled']
+            for name in ('trigger_seconds', 'response_seconds'):
+                value = saved.get(name)
+                if type(value) is int and 1 <= value <= 3600: setattr(self, name, value)
+        except (OSError, ValueError, TypeError, AttributeError):
+            pass
         self.microbit_port = 'COM6'
         self.logs = deque(maxlen=120)
-        self.status = {'state': 'IDLE', 'message': '안부 확인을 선택하면 자동으로 시작합니다.',
+        self.status = {'state': 'IDLE', 'message': '무응답 감지를 선택하면 자동으로 시작합니다.',
                        'active': False, 'decision': None, 'raw': 0, 'class': 0,
                        'movement': 'UNKNOWN', 'seconds': 0, 'laps': 0, 'phase': 'straight'}
         self.robot = self.flow = self.microbit = self.faces = None
@@ -65,7 +77,23 @@ class DaywatchService:
     def snapshot(self):
         with self.lock:
             return {**self.status, 'requested': self.requested,
-                    'microbitPort': self.microbit_port, 'logs': list(self.logs)}
+                    'microbitPort': self.microbit_port, 'logs': list(self.logs),
+                    'enabled': self.enabled, 'triggerSeconds': self.trigger_seconds, 'responseSeconds': self.response_seconds}
+
+    def configure(self, config):
+        if not isinstance(config, dict): raise ValueError('무응답 감지 설정을 확인하세요.')
+        with self.lock:
+            enabled = config.get('enabled', self.enabled)
+            trigger = config.get('triggerSeconds', self.trigger_seconds)
+            response = config.get('responseSeconds', self.response_seconds)
+            if type(enabled) is not bool or any(type(v) is not int or not 1 <= v <= 3600 for v in (trigger, response)):
+                raise ValueError('시간은 1~3600초의 정수로 입력하세요.')
+            folder = self.base/'data'; folder.mkdir(exist_ok=True)
+            temporary = folder/'daywatch_settings.tmp'
+            temporary.write_text(json.dumps({'enabled':enabled,'trigger_seconds':trigger,'response_seconds':response}),encoding='utf-8')
+            temporary.replace(folder/'daywatch_settings.json')
+            self.enabled, self.trigger_seconds, self.response_seconds = enabled, trigger, response
+            if not enabled: self.requested = False
 
     def select(self, enabled, port=None):
         with self.lock:
@@ -76,7 +104,7 @@ class DaywatchService:
                 if self.robot is not None and port != self.microbit_port:
                     raise ValueError('다른 기능으로 이동한 뒤 마빗 포트를 바꿔 주세요.')
                 self.microbit_port = port
-            self.requested = enabled
+            self.requested = enabled and self.enabled
             if enabled:
                 self.failed = False
                 self.status['message'] = '자동 연결 준비 중입니다.'
@@ -134,7 +162,7 @@ class DaywatchService:
         self.log('기존 로보독 연결 공유 · 마빗 '+self.microbit_port+' 연결')
 
     def tick(self, worker):
-        """True이면 안부 확인이 장치를 사용 중이므로 기존 동작을 섞지 않는다."""
+        """True이면 무응답 감지가 장치를 사용 중이므로 기존 동작을 섞지 않는다."""
         try:
             med_active = worker.medication is not None and worker.medication.snapshot()['active']
             if self.robot is not None:
@@ -144,11 +172,11 @@ class DaywatchService:
                     return True
             if not self.requested or self.failed:
                 if not self.failed:
-                    self.publish(state='IDLE', message='안부 확인 종료 · 기존 기능을 사용할 수 있습니다.')
+                    self.publish(state='IDLE', message='무응답 감지 종료 · 기존 기능을 사용할 수 있습니다.')
                 return False
             if med_active:
                 self.publish(state='MEDICATION', active=False,
-                             message='복약 알림을 먼저 진행합니다. 완료 후 안부 확인을 자동 재개합니다.')
+                             message='복약 알림을 먼저 진행합니다. 완료 후 무응답 감지를 자동 재개합니다.')
                 return False
             if self.robot is None:
                 if worker.pending or time.monotonic() < worker.audio_until:
@@ -172,8 +200,8 @@ class DaywatchService:
                 if mode is None:
                     raise ConnectionError('얼굴 인식 모드 응답 없음. AI 카메라 연결을 확인하세요.')
                 self.log('얼굴 인식 모드 응답: '+repr(mode))
-                cfg = runtime.Settings(class_confirm_seconds=runtime.CLASS_CONFIRM_SECONDS,
-                    response_seconds=runtime.RESPONSE_SECONDS, straight_seconds=runtime.STRAIGHT_SECONDS,
+                cfg = runtime.Settings(trigger_seconds=self.trigger_seconds, class_confirm_seconds=runtime.CLASS_CONFIRM_SECONDS,
+                    response_seconds=self.response_seconds, straight_seconds=runtime.STRAIGHT_SECONDS,
                     corner_seconds=runtime.CORNER_SECONDS, forward_speed=runtime.FORWARD_SPEED,
                     turn_speed=runtime.TURN_SPEED, bark_seconds=runtime.BARK_INTERVAL_SECONDS, angle_turns=True)
                 self.flow = runtime.DeviceWorkflow(self.robot, cfg, log=self.log, report=self.report)
@@ -191,6 +219,7 @@ class DaywatchService:
             if len(self.buffer) > 4096:
                 self.buffer.clear()
                 self.flow.hold('SIGNAL_LOST', '마빗 수신 형식을 확인하세요.')
+            self.flow.cfg = replace(self.flow.cfg, trigger_seconds=self.trigger_seconds, response_seconds=self.response_seconds)
             self.flow.tick(daytime=True)
             self.robot.enforce_cancelled_rotation()
             worker.audio_until = max(worker.audio_until, self.robot.sound_until)
@@ -207,12 +236,12 @@ class DaywatchService:
         except Exception as error:
             self.failed = True
             self.publish(state='ERROR', message=str(error), active=False)
-            self.log('안부 확인 오류: '+str(error))
+            self.log('무응답 감지 오류: '+str(error))
             if self.robot is not None or self.microbit is not None:
                 try:
                     return not self._release()
                 except Exception as cleanup_error:
-                    self.log('안부 확인 연결 정리 오류: '+str(cleanup_error))
+                    self.log('무응답 감지 연결 정리 오류: '+str(cleanup_error))
                     if self.microbit is not None:
                         try:
                             self.microbit.close()

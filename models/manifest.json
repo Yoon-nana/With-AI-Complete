@@ -40,5 +40,21 @@
     "runtime": "microbit/exercise_runtime.ts",
     "source_verified": true,
     "hardware_verified": false
+  },
+  "unified.hex": {
+    "sha256": "7d67fb7857007d2a5d8ec0eed36a397a9a912238a7dab1624f4825fc11e94bee",
+    "type": "two_original_trained_models_with_runtime_switch",
+    "runtime": "microbit/unified/main.ts",
+    "models": "microbit/unified/models.ts",
+    "build_verified": true,
+    "hardware_verified": false,
+    "buttons": {
+      "A": "checking",
+      "B": "exercise",
+      "A+B": "nap"
+    },
+    "reflash_on_mode_change": false,
+    "revision": 2,
+    "fix": "Reset cached input/output tensor lengths in ml_setModel to prevent error 809 on switching 2-class and 4-class models."
   }
 }

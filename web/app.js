@@ -190,7 +190,7 @@ function renderApp(){
 }
 function renderDaywatch(){
   const d=state?.daywatch;if(!d)return;
-  const labels={IDLE:'안부 확인 대기',PREPARING:'준비 자세를 잡는 중',WAITING:'연결·동작 대기',MOCK:'모의 연결 · 실제 감시 없음',MONITOR:'자동 감시 중',PATROL:'사각형 순찰 중',VERIFY:'얼굴 확인 중',OK:'정상 확인 완료',ALERT:'쓰러짐 확정 · 반응 확인 중',REPORTED:'모의 신고 완료',MOTION_RESUMED:'움직임 감지 · 순찰 중지',SIGNAL_LOST:'마빗 신호 대기',AI_LOST:'AI 연결 대기',ERROR:'연결 확인 필요',MEDICATION:'복약 알림 우선 진행'};
+  const labels={IDLE:'무응답 감지 대기',PREPARING:'준비 자세를 잡는 중',WAITING:'연결·동작 대기',MOCK:'모의 연결 · 실제 감시 없음',MONITOR:'자동 감시 중',PATROL:'사각형 순찰 중',VERIFY:'얼굴 확인 중',OK:'정상 확인 완료',ALERT:'쓰러짐 확정 · 반응 확인 중',REPORTED:'모의 신고 완료',MOTION_RESUMED:'움직임 감지 · 순찰 중지',SIGNAL_LOST:'마빗 신호 대기',AI_LOST:'AI 연결 대기',ERROR:'연결 확인 필요',MEDICATION:'복약 알림 우선 진행'};
   $('daywatch-state').textContent=labels[d.state]||d.state;
   $('daywatch-message').textContent=d.message;
   $('daywatch-result').textContent=d.decision===2?'사건 판정: 쓰러짐 확정 · 유지':d.decision===1?'사건 판정: 정상 확인':'아직 확정된 결과가 없습니다.';

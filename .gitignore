@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+node_modules/
+built/
+work/
+*.log
+*.jsonl
+in-helper.local.json
+data/*
+!data/guidance.json

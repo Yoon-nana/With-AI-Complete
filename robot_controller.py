@@ -2,6 +2,7 @@
 import importlib
 import inspect
 import logging
+import re
 import queue
 import threading
 import time
@@ -183,13 +184,46 @@ class RobotWorker:
         self.pending = set()
         self.stopping = threading.Event()
         self.available = False
+        self.connection_pending = False
+        self.connection_requests = queue.Queue(maxsize=1)
         self.last_praise = 0.0
         self.audio_until = 0.0
         self.medication = None  # KioskModel이 로컬 설정 저장소와 함께 연결한다.
-        self.daywatch = None  # 기존 연결에 추가한 안부 확인 서비스
+        self.daywatch = None  # 기존 연결에 추가한 무응답 감지 서비스
         self.activity = None
         self.thread = threading.Thread(target=self._run, daemon=True)
         self.thread.start()
+
+    def request_connection(self, port=None):
+        if port is not None and not re.fullmatch(r"COM[1-9][0-9]{0,3}", str(port).upper()):
+            raise ValueError("장치 목록에서 로보독 COM 포트를 선택하세요.")
+        with self.lock:
+            if self.stopping.is_set() or self.connection_pending or self.pending:
+                raise ValueError("처리 중입니다. 동작이 끝난 뒤 다시 시도하세요.")
+            if self.daywatch is not None and self.daywatch.snapshot()['state'] in ('PATROL','VERIFY','ALERT','PREPARING'):
+                raise ValueError("무응답 감지 동작을 종료한 뒤 연결을 변경하세요.")
+            if self.medication is not None and self.medication.snapshot()['active']:
+                raise ValueError("복약 알림을 확인한 뒤 연결을 변경하세요.")
+            if self.available and port is not None:
+                raise ValueError("이미 로보독이 연결되어 있습니다. 먼저 연결 해제하세요.")
+            self.connection_pending = True
+            self.connection_requests.put_nowait(port)
+
+    def _connection_tick(self):
+        try:
+            port = self.connection_requests.get_nowait()
+        except queue.Empty:
+            return
+        try:
+            self.controller.close()
+            self.available = False
+            self.controller = RobotController(str(port).upper()) if port is not None else MockRobotController()
+            self.available = self.controller.initialize()
+            self.events.put(("status", "로보독 연결됨 · " + str(port) if self.available else "로보독 연결 해제 · 화면 사용 가능"))
+        except Exception as error:
+            self._fallback(error)
+        finally:
+            self.connection_pending = False
 
     def submit(self, action):
         if (self.daywatch is not None and self.daywatch.requested and not action.startswith('MED_')
@@ -239,6 +273,7 @@ class RobotWorker:
             except Exception as error:
                 self._fallback(error)
             while not self.stopping.is_set():
+                self._connection_tick()
                 if self.activity is not None:
                     self.activity.tick(self)
                 if self.medication is not None and not self.pending and time.monotonic() >= self.audio_until:
@@ -287,7 +322,7 @@ class RobotWorker:
                 try:
                     self.daywatch.close()
                 except Exception:
-                    logging.exception('안부 확인 종료 실패')
+                    logging.exception('무응답 감지 종료 실패')
             try:
                 self.controller.close()
             except Exception:

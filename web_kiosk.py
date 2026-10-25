@@ -371,6 +371,7 @@ class KioskModel:
                        "autoSpeak": self.learning_mode == "guided" or self.help_revealed or bool(self.review) or s.screen == "complete"},
                 "robot": {"available": self.worker.available, "mode": controller.mode,
                           "status": self.status, "warnings": list(self.warnings),
+                          "connectionPending": getattr(self.worker,"connection_pending",False), "port": getattr(controller,"port",None),
                           "busy": bool(self.worker.pending), "lastAction": self.last_action,
                           "sound": getattr(controller, "sound_enabled", False),
                           "gestures": getattr(controller, "gestures_enabled", False),
@@ -418,7 +419,7 @@ class KioskModel:
         if not isinstance(action, str) or (value is not None and not isinstance(value, str)):
             raise ValueError("버튼 값을 확인해 주세요.")
         s = self.session
-        global_actions = {"open_app", "daywatch_port", "sensor_config", "exercise_start", "exercise_end", "exercise_pause", "nap_start", "nap_end", "med_set", "med_add", "med_remove", "med_cancel", "med_mock_qr", "quit", "clear_warnings"}
+        global_actions = {"open_app", "daywatch_config", "daywatch_port", "sensor_config", "exercise_start", "exercise_end", "exercise_pause", "nap_start", "nap_end", "med_set", "med_add", "med_remove", "med_cancel", "med_mock_qr", "quit", "clear_warnings"}
         if self.medication.snapshot()["active"] and action not in global_actions:
             raise ValueError("복약 알림이 진행 중이에요. STOP QR로 확인하거나 알림을 취소해 주세요.")
         if self.review and action not in (*global_actions, "resume_review", "home", "repeat", "hint", "help", "sound_test", "gesture_test"):
@@ -433,7 +434,7 @@ class KioskModel:
             self.app_section = value
             self.message = "복약 시간을 설정해 주세요." if value == "medication" else "사용할 기능을 골라 주세요." if value == "hub" else self._guide()
             if value == 'daywatch':
-                self.message = '안부 확인을 자동으로 시작합니다.'
+                self.message = '무응답 감지 설정을 확인해 주세요.'
             elif value == 'nap':
                 self.activity.nap_finished = False
                 self.message = '몇 분 뒤에 깨워드릴까요?'
@@ -441,7 +442,7 @@ class KioskModel:
             self.activity.start_exercise(); self.app_section = 'exercise'
         elif action == 'exercise_end':
             self.activity.end_exercise(); self.app_section = 'hub'
-            self.message = '체조를 마쳤어요. 안부 감시로 돌아갑니다.'
+            self.message = '체조를 마쳤어요. 무응답 감지로 돌아갑니다.'
         elif action == 'exercise_pause':
             self.activity.pause_exercise()
         elif action == 'nap_start':
@@ -451,11 +452,17 @@ class KioskModel:
             self.message = f'{minutes}분 뒤 알람을 등록했어요.'
         elif action == 'nap_end':
             self.activity.end_nap(); self.app_section = 'hub'
-            self.message = '낮잠을 마쳤어요. 안부 감시로 돌아갑니다.'
+            self.message = '낮잠을 마쳤어요. 무응답 감지로 돌아갑니다.'
         elif action == 'sensor_config':
             try: config = json.loads(value)
             except ValueError: raise ValueError('마빗 연결 설정을 확인하세요.')
             self.activity.configure(config)
+        elif action == 'daywatch_config':
+            try: config = json.loads(value)
+            except ValueError: raise ValueError('무응답 감지 설정을 확인하세요.')
+            self.daywatch.configure(config)
+            self.daywatch.select(self.activity.mode == 'checking')
+            self.message = '무응답 감지 설정을 저장했습니다.'
         elif action == 'daywatch_port':
             self.activity.configure({'port':value,'drive':self.activity.link.drive})
             self.daywatch.select(self.daywatch.requested, port=value)
@@ -628,7 +635,7 @@ class KioskModel:
 
 
 class LocalKioskServer:
-    def __init__(self, worker, base=BASE):
+    def __init__(self, worker, base=BASE, port=0):
         self.model = KioskModel(worker, base)
         self.token = secrets.token_urlsafe(24)
         outer = self
@@ -658,6 +665,35 @@ class LocalKioskServer:
                 if not self.trusted():
                     return self.reply(403, {"error": "허용되지 않은 호스트"})
                 route = urlsplit(self.path).path
+                if route == "/bridge-info":
+                    body = b'{"bridge":"aigo-in-v1"}'
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.send_header("Access-Control-Allow-Origin", "*")
+                    self.send_header("Content-Length", str(len(body)))
+                    self.end_headers()
+                    self.wfile.write(body)
+                    return
+                if route == "/start":
+                    self.send_response(302)
+                    self.send_header("Location", "http://" + outer.host + "/" + ("?" + urlsplit(self.path).query if urlsplit(self.path).query else "") + "#" + outer.token)
+                    self.end_headers()
+                    return
+                if route == "/firmware/unified.hex":
+                    firmware = Path(base) / "models" / "unified.hex"
+                    if not firmware.is_file(): return self.reply(404, {"error":"통합 HEX 파일이 없습니다."})
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/octet-stream")
+                    self.send_header("Content-Disposition", 'attachment; filename="AIGO-IN-unified.hex"')
+                    body = firmware.read_bytes()
+                    self.send_header("Content-Length", str(len(body)))
+                    self.end_headers()
+                    self.wfile.write(body)
+                    return
+                if route == "/api/ports":
+                    if not self.authorized(): return self.reply(403, {"error":"접근 권한 없음"})
+                    from serial.tools import list_ports
+                    return self.reply(200, {"ports":[{"port":p.device,"description":p.description} for p in list_ports.comports()]})
                 if route == "/api/state":
                     if not self.authorized():
                         return self.reply(403, {"error": "접근 권한 없음"})
@@ -673,6 +709,16 @@ class LocalKioskServer:
                 origin = self.headers.get("Origin")
                 if not self.authorized() or origin not in (None, "http://" + outer.host):
                     return self.reply(403, {"error": "접근 권한 없음"})
+                if self.path in ("/api/connect-robot", "/api/disconnect-robot"):
+                    try:
+                        length = int(self.headers.get("Content-Length","0"))
+                        if not 0 < length <= 1024: raise ValueError("요청 크기를 확인하세요.")
+                        payload = json.loads(self.rfile.read(length))
+                        if not isinstance(payload, dict): raise ValueError("연결 요청을 확인하세요.")
+                        outer.model.worker.request_connection(payload.get("port", "") if self.path == "/api/connect-robot" else None)
+                        return self.reply(202, {"message":"연결 요청을 전달했습니다."})
+                    except (ValueError,TypeError) as error:
+                        return self.reply(400, {"error":str(error)})
                 if self.path != "/api/event":
                     return self.reply(404, {"error": "허용되지 않은 경로"})
                 try:
@@ -689,7 +735,7 @@ class LocalKioskServer:
                     logging.exception("키오스크 요청 처리 실패")
                     self.reply(500, {"error": "처리 중 문제가 발생했어요. 다시 시도해 주세요."})
 
-        self.http = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        self.http = ThreadingHTTPServer(("127.0.0.1", port), Handler)
         self.http.daemon_threads = True
         self.host = f"127.0.0.1:{self.http.server_port}"
         self.url = f"http://{self.host}/#{self.token}"
@@ -713,7 +759,7 @@ class BrowserApp:
         self.root.title("로보독 도우미 · 실행 중")
         self.root.geometry("730x440")
         self.root.minsize(650, 420)
-        tk.Label(root, text="주문 연습 / 복약 알리미 / 안부 확인이 브라우저에 열렸어요", bg="#f3f6fa", pady=22).pack()
+        tk.Label(root, text="주문 연습 / 복약 알리미 / 무응답 감지가 브라우저에 열렸어요", bg="#f3f6fa", pady=22).pack()
         tk.Label(root, text="이 창을 닫으면 로보독과 키오스크를 종료합니다.", bg="#f3f6fa").pack(pady=10)
         tk.Button(root, text="키오스크 다시 열기", command=self.open, pady=12).pack(pady=10)
         tk.Button(root, text="종료 및 로보독 연결 닫기", command=self.close, pady=12).pack(pady=10)
