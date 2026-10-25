@@ -14,7 +14,7 @@
   if(typeof state==='undefined'||!state?.daywatch)return;
   const d=state.daywatch;
   if(!pending)toggle.checked=d.enabled;
-  el('daywatch-enabled-state').textContent=!d.enabled?'꺼짐 · 감지와 자동 모의 신고를 중지했습니다.':state.activity?.mode!=='checking'?'켜짐 · 체조·낮잠이 끝나면 감지를 재개합니다.':'켜짐 · 무응답 감지를 사용합니다.';
+  el('daywatch-enabled-state').textContent=!d.enabled?'꺼짐 · 마빗 감지와 자동 모의 신고를 멈춥니다. 보드가 휴식 모드로 전환됩니다.':state.activity?.mode!=='checking'?'켜짐 · 체조·낮잠이 끝나면 마빗 감지를 재개합니다.':'켜짐 · 무응답 감지를 사용합니다.';
   if(!dirty){el('daywatch-trigger-seconds').value=d.triggerSeconds;el('daywatch-response-seconds').value=d.responseSeconds;}
  }
  setInterval(update,300);

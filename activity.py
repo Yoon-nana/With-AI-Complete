@@ -168,7 +168,13 @@ class ActivityCoordinator:
                 if row is None or row['status'] in ('done','cancelled'):
                     self.nap_id = self.nap_due = None; self.mode = 'checking'
                     self.nap_finished = True
-            self.link.select(self.mode)
+            # Pausing the IN monitor must also stop inference on the board.
+            # The unified firmware's NAP mode is its idle state; keep the PC
+            # activity mode as checking so re-enabling resumes the same mode.
+            link_mode = self.mode
+            if self.mode == 'checking' and not self.daywatch.enabled:
+                link_mode = 'nap'
+            self.link.select(link_mode)
         enabled = self.link.manual_connected or worker.controller.mode == 'real' and worker.available
         self.link.tick(enabled)
         with self.lock:
