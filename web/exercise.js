@@ -11,7 +11,7 @@
   const card=document.createElement('button');
   card.id='app-choice-exercise';card.dataset.action='exercise_start';
   card.innerHTML='<span aria-hidden="true">✦</span><strong>가벼운 체조</strong><small>무작위 1~5회 미션에 도전해요</small>';
-  document.querySelector('.app-choices').append(card);
+  document.querySelector('.app-choices').insertBefore(card,document.getElementById('app-choice-daywatch'));
   function current(){return typeof state!=='undefined'?state:null;}
   function stopVoice(){speechToken++;if('speechSynthesis'in window)speechSynthesis.cancel();}
   function instruction(m){return `${m.title}${m.classId===4?'를':'을'} ${m.goal}회 해 보세요. ${moves[m.classId].instruction}`;}

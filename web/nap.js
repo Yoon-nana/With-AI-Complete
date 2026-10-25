@@ -4,7 +4,7 @@
   const card=document.createElement('button');card.id='app-choice-nap';
   card.dataset.action='open_app';card.dataset.value='nap';
   card.innerHTML='<span aria-hidden="true">☾</span><strong>낮잠 자기</strong><small>쉬는 시간을 정하면 깨워드려요</small>';
-  document.querySelector('.app-choices').append(card);
+  document.querySelector('.app-choices').insertBefore(card,document.getElementById('app-choice-daywatch'));
   let lastRing=null,lastSoundAt=0,audio=null;
   const tones=new Set();
   function stopWakeSound(){
