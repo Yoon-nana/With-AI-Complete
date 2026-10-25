@@ -2,8 +2,9 @@ param([string]$LaunchUri='aigo-in://open?port=AUTO',[switch]$NoBrowser)
 $ErrorActionPreference='Stop'
 $mutex=$null;$owned=$false
 try {
-    if($LaunchUri -notmatch '^aigo-in://open/?\?port=(AUTO|COM[1-9][0-9]{0,3})$'){throw 'Invalid IN helper address.'}
+    if($LaunchUri -notmatch '^aigo-in://open/?\?port=(AUTO|COM[1-9][0-9]{0,3})(?:&(app=(?:hub|kiosk|medication|daywatch|exercise|nap)|device=(?:robot|microbit)))?$'){throw 'Invalid IN helper address.'}
     $port=$Matches[1]
+    $selection=$Matches[2]
     $config=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'in-helper.local.json') -Raw -Encoding UTF8 | ConvertFrom-Json
     $mutex=[Threading.Mutex]::new($false,'Local\AigoInLauncher')
     $owned=$mutex.WaitOne(0)
@@ -27,6 +28,7 @@ try {
     }
     $target='http://127.0.0.1:8766/start'
     if($port -ne 'AUTO'){$target+='?robot_port='+$port}
+    if($selection){$target+= $(if($target.Contains('?')){'&'}else{'?'})+$selection}
     if(-not $NoBrowser){Start-Process -FilePath $target}
 } catch {
     if($NoBrowser){throw}

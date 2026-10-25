@@ -19,12 +19,12 @@
   else {const done=document.createElement('div');done.className='firmware-guide-finish';done.innerHTML='<strong>복사 → 재시작 기다리기 → COM 포트 연결</strong><p>프로그램은 처음 한 번 설치하면 돼요.<br>A: 무응답 감지 · B: 체조 · A+B: 휴식</p>';content.append(done)}
   if(step.keys){const key=document.createElement('div');key.className='firmware-guide-keys';key.textContent=step.keys;content.append(key)}
   const tip=document.createElement('p');tip.className='firmware-guide-tip';tip.textContent=step.tip;content.append(tip);
-  dialog.querySelector('.firmware-guide-page').textContent=`${page+1} / ${steps.length} 단계`;back.disabled=page===0;next.textContent=page===steps.length-1?'설치했어요 · 연결하기':'다음';dialog.scrollTop=0;
+  dialog.querySelector('.firmware-guide-page').textContent=`${page+1} / ${steps.length} 단계`;back.disabled=page===0;next.textContent=page===steps.length-1?'안내 닫기':'다음';dialog.scrollTop=0;
  }
  function close(){dialog.close();returnFocus?.focus()}
  dialog.querySelector('.firmware-guide-close').onclick=close;
  back.onclick=()=>{if(page>0){page--;render()}};
- next.onclick=()=>{if(page<steps.length-1){page++;render()}else{close();const connection=document.getElementById('in-connect-dialog');if(connection?.open)connection.close();const button=document.getElementById('in-microbit-open');if(button)button.click();else location.href='http://127.0.0.1:8766/start'}};
+ next.onclick=()=>{if(page<steps.length-1){page++;render()}else close()};
  document.addEventListener('click',event=>{const link=event.target.closest('a[download]');if(!link||!link.getAttribute('href')?.includes('unified.hex')||link.classList.contains('firmware-guide-redownload')||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
   // Keep the native download action; the dialog explains the following manual steps.
   returnFocus=link;page=0;dialog.querySelector('.firmware-guide-redownload').href=link.href;render();if(!dialog.open)dialog.showModal();
