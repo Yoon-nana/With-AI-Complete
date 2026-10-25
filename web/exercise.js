@@ -10,7 +10,7 @@
   let missionId=null, completeSpoken=false, wasPaused=false, speechToken=0;
   const card=document.createElement('button');
   card.id='app-choice-exercise';card.dataset.action='exercise_start';
-  card.innerHTML='<span aria-hidden="true">✦</span><strong>가벼운 체조</strong><small>무작위 3~10회 미션에 도전해요</small>';
+  card.innerHTML='<span aria-hidden="true">✦</span><strong>가벼운 체조</strong><small>무작위 1~5회 미션에 도전해요</small>';
   document.querySelector('.app-choices').append(card);
   function current(){return typeof state!=='undefined'?state:null;}
   function stopVoice(){speechToken++;if('speechSynthesis'in window)speechSynthesis.cancel();}

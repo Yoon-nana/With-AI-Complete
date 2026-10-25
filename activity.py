@@ -79,7 +79,7 @@ class ActivityCoordinator:
         self.last_action = action[0]
         index = [a[0] for a in ACTIONS].index(action[0])
         self.mission = {'id':uuid.uuid4().hex,'classId':action[0],'action':action[1],
-                        'title':action[2],'goal':self.rng.randint(3,10),'done':0,
+                        'title':action[2],'goal':self.rng.randint(1,5),'done':0,
                         'complete':False,'paused':False,
                         'baseline':self.counters[index] if self.counters else None}
         self.completed_at = None
