@@ -2,6 +2,8 @@
 
 **웹 시작 주소: https://yoon-nana.github.io/With-AI-Complete/**
 
+처음 사용하는 PC는 [IN + ON/OUT 통합 ZIP](https://github.com/Yoon-nana/AIGO-On-n-Out/releases/latest/download/AIGO_All_In_One.zip)을 받아 모두 압축 풀고 최상위 폴더의 `Install_All.cmd`를 한 번 실행하세요. 이후 `Start_IN.cmd` 또는 `Start_ON_OUT.cmd`로 시작합니다. 두 서비스가 한 `.venv`를 공유합니다.
+
 ## 현재 사용 방법
 
 1. 프로젝트 전체를 다운로드하고 압축을 풉니다.
