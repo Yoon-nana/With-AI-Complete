@@ -5,7 +5,20 @@ try {
     if($LaunchUri -notmatch '^aigo-in://open/?\?port=(AUTO|COM[1-9][0-9]{0,3})(?:&(app=(?:hub|kiosk|medication|daywatch|exercise|nap)|device=(?:robot|microbit)))?$'){throw 'Invalid IN helper address.'}
     $port=$Matches[1]
     $selection=$Matches[2]
-    $config=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'in-helper.local.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+    $configFile=Join-Path $PSScriptRoot 'in-helper.local.json'
+    $bundleRoot=Split-Path -Parent $PSScriptRoot
+    $runtimeRoot=if(Test-Path -LiteralPath (Join-Path $bundleRoot 'Install_All.cmd') -PathType Leaf){$bundleRoot}else{$PSScriptRoot}
+    $expectedPython=Join-Path $runtimeRoot '.venv\Scripts\python.exe'
+    $config=$null
+    if(Test-Path -LiteralPath $configFile -PathType Leaf){
+        try{$config=Get-Content -LiteralPath $configFile -Raw -Encoding UTF8 | ConvertFrom-Json}catch{$config=$null}
+    }
+    if($null -eq $config -or $config.python -ne $expectedPython -or -not (Test-Path -LiteralPath $expectedPython -PathType Leaf)){
+        $psExe=Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+        & $psExe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'IN_Install.ps1') -RuntimeRoot $runtimeRoot
+        if($LASTEXITCODE -ne 0){throw 'IN setup failed. Run Install_All.cmd to see the installation details.'}
+        $config=Get-Content -LiteralPath $configFile -Raw -Encoding UTF8 | ConvertFrom-Json
+    }
     $mutex=[Threading.Mutex]::new($false,'Local\AigoInLauncher')
     $owned=$mutex.WaitOne(0)
     if(-not $owned){exit 0}
